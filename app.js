@@ -2,8 +2,21 @@ const workInput = document.querySelector("#work");
 const restInput = document.querySelector("#rest");
 const roundsInput = document.querySelector("#rounds");
 const setupPanel = document.querySelector("#setup");
+const presetsPanel = document.querySelector("#presets");
+const editorPanel = document.querySelector("#editor");
 const sessionPanel = document.querySelector("#session");
 const donePanel = document.querySelector("#done");
+const presetList = document.querySelector("#preset-list");
+const presetEmpty = document.querySelector("#preset-empty");
+const presetLimit = document.querySelector("#preset-limit");
+const addPresetBtn = document.querySelector("#add-preset");
+const editorTitle = document.querySelector("#editor-title");
+const presetName = document.querySelector("#preset-name");
+const presetWork = document.querySelector("#preset-work");
+const presetRest = document.querySelector("#preset-rest");
+const presetRounds = document.querySelector("#preset-rounds");
+const presetError = document.querySelector("#preset-error");
+const deletePresetBtn = document.querySelector("#delete-preset");
 const labelEl = document.querySelector("#label");
 const timeEl = document.querySelector("#time");
 const ringEl = document.querySelector("#ring");
@@ -29,12 +42,18 @@ const phaseLabels = {
 };
 
 const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+const PRESET_KEY = "interval-presets";
+const MAX_PRESETS = 5;
+const PENCIL_SVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.21a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
 
 let audioCtx = null;
 let wakeLock = null;
 let timerId = null;
 
 let mode = "idle";
+let view = "setup";
+let presets = loadPresets();
+let editingId = null;
 let pausedFrom = null;
 let round = 1;
 let totalRounds = 8;
@@ -53,12 +72,21 @@ document.querySelectorAll(".stepper button").forEach((button) => {
   });
 });
 
-[workInput, restInput, roundsInput].forEach((input) => {
+document.querySelectorAll(".stepper input").forEach((input) => {
   input.addEventListener("change", () => clampInput(input));
   input.addEventListener("blur", () => clampInput(input));
 });
 
 document.querySelector("#start").addEventListener("click", start);
+document.querySelector("#open-presets").addEventListener("click", () => showView("presets"));
+document.querySelector("#presets-back").addEventListener("click", () => showView("setup"));
+document.querySelector("#editor-back").addEventListener("click", () => showView("presets"));
+addPresetBtn.addEventListener("click", () => openEditor(null));
+document.querySelector("#save-preset").addEventListener("click", savePreset);
+deletePresetBtn.addEventListener("click", deletePreset);
+presetName.addEventListener("input", () => {
+  presetError.hidden = true;
+});
 pauseBtn.addEventListener("click", togglePause);
 document.querySelector("#stop").addEventListener("click", stop);
 document.querySelector("#back").addEventListener("click", stop);
@@ -204,7 +232,9 @@ function render() {
   document.body.dataset.paused = mode === "paused" ? "true" : "false";
   themeMeta.setAttribute("content", themeColors[screen] || themeColors.idle);
 
-  setupPanel.hidden = mode !== "idle";
+  setupPanel.hidden = mode !== "idle" || view !== "setup";
+  presetsPanel.hidden = mode !== "idle" || view !== "presets";
+  editorPanel.hidden = mode !== "idle" || view !== "editor";
   sessionPanel.hidden = mode === "idle" || mode === "done";
   donePanel.hidden = mode !== "done";
 
@@ -230,6 +260,128 @@ function drawRing(screen, remaining) {
   const progress = Math.min(1, Math.max(0, 1 - remaining / phaseDurationMs));
   const drawn = progress >= 1 ? 1 : Math.max(progress, 0.012);
   ringEl.style.strokeDasharray = `${drawn} 1`;
+}
+
+function showView(next) {
+  view = next;
+  if (next === "presets") renderPresetList();
+  render();
+}
+
+function loadPresets() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(PRESET_KEY) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isPreset).slice(0, MAX_PRESETS);
+  } catch {
+    return [];
+  }
+}
+
+function isPreset(preset) {
+  return Boolean(
+    preset &&
+      typeof preset.id === "string" &&
+      typeof preset.name === "string" &&
+      preset.name.trim() &&
+      Number.isFinite(preset.work) &&
+      Number.isFinite(preset.rest) &&
+      Number.isFinite(preset.rounds)
+  );
+}
+
+function persistPresets() {
+  localStorage.setItem(PRESET_KEY, JSON.stringify(presets));
+}
+
+function renderPresetList() {
+  presetList.replaceChildren();
+  presetEmpty.hidden = presets.length > 0;
+  addPresetBtn.hidden = presets.length >= MAX_PRESETS;
+  presetLimit.hidden = presets.length < MAX_PRESETS;
+
+  presets.forEach((preset) => {
+    const item = document.createElement("li");
+    item.className = "preset-row";
+
+    const useBtn = document.createElement("button");
+    useBtn.type = "button";
+    useBtn.className = "preset-load";
+    const name = document.createElement("span");
+    name.className = "preset-name";
+    name.textContent = preset.name;
+    const meta = document.createElement("span");
+    meta.className = "preset-meta";
+    meta.textContent = `${preset.work}s work · ${preset.rest}s rest · ${preset.rounds} rounds`;
+    useBtn.append(name, meta);
+    useBtn.addEventListener("click", () => applyPreset(preset.id));
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "icon-btn";
+    editBtn.setAttribute("aria-label", `Edit ${preset.name}`);
+    editBtn.innerHTML = PENCIL_SVG;
+    editBtn.addEventListener("click", () => openEditor(preset.id));
+
+    item.append(useBtn, editBtn);
+    presetList.append(item);
+  });
+}
+
+function openEditor(id) {
+  if (!id && presets.length >= MAX_PRESETS) return;
+  editingId = id;
+  const preset = presets.find((item) => item.id === id);
+  editorTitle.textContent = preset ? "Edit preset" : "New preset";
+  deletePresetBtn.hidden = !preset;
+  presetError.hidden = true;
+  presetName.value = preset ? preset.name : "";
+  presetWork.value = String(preset ? preset.work : workInput.value);
+  presetRest.value = String(preset ? preset.rest : restInput.value);
+  presetRounds.value = String(preset ? preset.rounds : roundsInput.value);
+  showView("editor");
+}
+
+function savePreset() {
+  [presetWork, presetRest, presetRounds].forEach(clampInput);
+  const name = presetName.value.trim();
+  if (!name) {
+    presetError.hidden = false;
+    return;
+  }
+
+  const next = {
+    id: editingId || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
+    name,
+    work: Number(presetWork.value),
+    rest: Number(presetRest.value),
+    rounds: Number(presetRounds.value),
+  };
+
+  if (editingId) {
+    presets = presets.map((item) => (item.id === editingId ? next : item));
+  } else if (presets.length < MAX_PRESETS) {
+    presets = [...presets, next];
+  }
+
+  persistPresets();
+  showView("presets");
+}
+
+function deletePreset() {
+  presets = presets.filter((item) => item.id !== editingId);
+  editingId = null;
+  persistPresets();
+  showView("presets");
+}
+
+function applyPreset(id) {
+  const preset = presets.find((item) => item.id === id);
+  if (!preset) return;
+  workInput.value = String(preset.work);
+  restInput.value = String(preset.rest);
+  roundsInput.value = String(preset.rounds);
+  showView("setup");
 }
 
 function formatTime(seconds) {
