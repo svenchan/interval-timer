@@ -55,7 +55,12 @@
       <section id="session" class="panel" hidden>
         <div class="readout">
           <p id="label" class="phase" aria-live="polite">Get ready</p>
-          <p id="time" class="time">3</p>
+          <div class="timer">
+            <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+              <circle id="ring" cx="50" cy="50" r="44" pathLength="1"></circle>
+            </svg>
+            <p id="time" class="time">3</p>
+          </div>
           <p id="round" class="round">Round 1 of 8</p>
           <p id="left" class="left">8 left</p>
         </div>

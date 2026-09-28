@@ -6,6 +6,8 @@ const sessionPanel = document.querySelector("#session");
 const donePanel = document.querySelector("#done");
 const labelEl = document.querySelector("#label");
 const timeEl = document.querySelector("#time");
+const ringEl = document.querySelector("#ring");
+const ringSvg = document.querySelector(".ring");
 const roundEl = document.querySelector("#round");
 const leftEl = document.querySelector("#left");
 const summaryEl = document.querySelector("#summary");
@@ -39,6 +41,7 @@ let totalRounds = 8;
 let workMs = 30000;
 let restMs = 15000;
 let phaseEndsAt = 0;
+let phaseDurationMs = 0;
 let remainingMs = 0;
 let lastBeepSecond = null;
 
@@ -128,6 +131,7 @@ function isWorkoutActive() {
 
 function enterPhase(next, durationMs, startedAt) {
   mode = next;
+  phaseDurationMs = durationMs;
   phaseEndsAt = startedAt + durationMs;
   lastBeepSecond = null;
 }
@@ -212,9 +216,20 @@ function render() {
 
   labelEl.textContent = mode === "paused" ? "Paused" : phaseLabels[mode];
   timeEl.textContent = formatTime(secondsLeft);
+  drawRing(screen, remaining);
   roundEl.textContent = `Round ${round} of ${totalRounds}`;
   leftEl.textContent = left === 1 ? "1 left" : `${left} left`;
   pauseBtn.textContent = mode === "paused" ? "Resume" : "Pause";
+}
+
+function drawRing(screen, remaining) {
+  const active = screen === "work" || screen === "rest";
+  ringSvg.hidden = !active;
+  if (!active || phaseDurationMs <= 0) return;
+
+  const progress = Math.min(1, Math.max(0, 1 - remaining / phaseDurationMs));
+  const drawn = progress >= 1 ? 1 : Math.max(progress, 0.012);
+  ringEl.style.strokeDasharray = `${drawn} 1`;
 }
 
 function formatTime(seconds) {

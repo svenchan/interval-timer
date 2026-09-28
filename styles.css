@@ -223,8 +223,38 @@ h1 {
   text-transform: uppercase;
 }
 
+.timer {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(78vw, 22rem);
+  aspect-ratio: 1;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+  color: var(--fg);
+}
+
+.ring[hidden] {
+  display: none;
+}
+
+.ring circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.75;
+  stroke-linecap: round;
+}
+
 .time {
-  margin: 0.25rem 0 0.5rem;
+  margin: 0;
   font-size: clamp(6.5rem, 34vw, 9rem);
   font-weight: 650;
   line-height: 0.9;
