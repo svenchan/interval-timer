@@ -167,6 +167,7 @@ function enterPhase(next, durationMs, startedAt) {
 function advance(playTone) {
   const endedAt = phaseEndsAt;
   if (mode === "countdown") {
+    if (playTone) playCountdownFinish();
     enterPhase("work", workMs, endedAt);
     return;
   }
@@ -180,7 +181,7 @@ function advance(playTone) {
     return;
   }
   if (mode === "rest") {
-    if (playTone) playPhaseEnd();
+    if (playTone) playCountdownFinish();
     round += 1;
     enterPhase("work", workMs, endedAt);
   }
@@ -398,12 +399,16 @@ function ensureAudio() {
 }
 
 function playCountdownBeep() {
-  tone(880, 0.12, "sine");
+  tone(880, 0.12, "square");
+}
+
+function playCountdownFinish() {
+  tone(1568, 0.75, "square");
 }
 
 function playPhaseEnd() {
-  tone(392, 0.28, "triangle");
-  window.setTimeout(() => tone(294, 0.36, "triangle"), 150);
+  tone(392, 0.28, "square");
+  window.setTimeout(() => tone(294, 0.36, "square"), 150);
 }
 
 function tone(frequency, duration, type) {
@@ -414,7 +419,7 @@ function tone(frequency, duration, type) {
   oscillator.type = type;
   oscillator.frequency.value = frequency;
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(0.22, now + 0.015);
+  gain.gain.exponentialRampToValueAtTime(1, now + 0.015);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
   oscillator.connect(gain).connect(audioCtx.destination);
   oscillator.start(now);
