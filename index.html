@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#16171d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Interval</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-screen="idle">
+    <main class="app">
+      <section id="setup" class="panel">
+        <h1>Interval</h1>
+        <div class="settings">
+          <div class="setting">
+            <div class="name">
+              <label for="work">Work</label>
+              <span>seconds</span>
+            </div>
+            <div class="stepper">
+              <button type="button" data-target="work" data-delta="-1" aria-label="Decrease work">−</button>
+              <input id="work" type="number" inputmode="numeric" min="1" max="3600" value="30">
+              <button type="button" data-target="work" data-delta="1" aria-label="Increase work">+</button>
+            </div>
+          </div>
+          <div class="setting">
+            <div class="name">
+              <label for="rest">Rest</label>
+              <span>seconds</span>
+            </div>
+            <div class="stepper">
+              <button type="button" data-target="rest" data-delta="-1" aria-label="Decrease rest">−</button>
+              <input id="rest" type="number" inputmode="numeric" min="1" max="3600" value="15">
+              <button type="button" data-target="rest" data-delta="1" aria-label="Increase rest">+</button>
+            </div>
+          </div>
+          <div class="setting">
+            <div class="name">
+              <label for="rounds">Rounds</label>
+              <span>repeat</span>
+            </div>
+            <div class="stepper">
+              <button type="button" data-target="rounds" data-delta="-1" aria-label="Decrease rounds">−</button>
+              <input id="rounds" type="number" inputmode="numeric" min="1" max="99" value="8">
+              <button type="button" data-target="rounds" data-delta="1" aria-label="Increase rounds">+</button>
+            </div>
+          </div>
+        </div>
+        <button type="button" id="start" class="primary">Start</button>
+      </section>
+
+      <section id="session" class="panel" hidden>
+        <div class="readout">
+          <p id="label" class="phase" aria-live="polite">Get ready</p>
+          <p id="time" class="time">3</p>
+          <p id="round" class="round">Round 1 of 8</p>
+          <p id="left" class="left">8 left</p>
+        </div>
+        <div class="actions">
+          <button type="button" id="pause" class="primary">Pause</button>
+          <button type="button" id="stop" class="ghost">Stop</button>
+        </div>
+      </section>
+
+      <section id="done" class="panel" hidden>
+        <div class="readout">
+          <p class="phase">Done</p>
+          <p id="summary" class="round">8 rounds complete</p>
+        </div>
+        <button type="button" id="back" class="primary">Back</button>
+      </section>
+    </main>
+    <script src="app.js" defer></script>
+  </body>
+</html>

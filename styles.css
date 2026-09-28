@@ -1,0 +1,254 @@
+:root {
+  color-scheme: dark;
+  --bg: #16171d;
+  --fg: #f6f4ef;
+  --muted: #a8a49b;
+  --fill: #f6f4ef;
+  --ink: #16171d;
+}
+
+body[data-screen="countdown"] {
+  --bg: #1c1917;
+  --fg: #fafaf9;
+  --muted: #d6d3d1;
+}
+
+body[data-screen="work"] {
+  --bg: #c2410c;
+  --fg: #fff7ed;
+  --muted: #ffedd5;
+  --fill: #fff7ed;
+  --ink: #431407;
+}
+
+body[data-screen="rest"] {
+  --bg: #155e75;
+  --fg: #ecfeff;
+  --muted: #cffafe;
+  --fill: #ecfeff;
+  --ink: #083344;
+}
+
+body[data-screen="done"] {
+  --bg: #166534;
+  --fg: #f0fdf4;
+  --muted: #dcfce7;
+  --fill: #f0fdf4;
+  --ink: #052e16;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  min-height: 100dvh;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}
+
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(1.25rem, env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    max(1.25rem, env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
+}
+
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+h1 {
+  margin: 0.25rem 0 1.5rem;
+  font-size: 1.85rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+}
+
+.setting:last-child {
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 16%, transparent);
+}
+
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.name label {
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+
+.name span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stepper button {
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--fill);
+  color: var(--ink);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.stepper input {
+  width: 4.5rem;
+  padding: 0.2rem 0;
+  border: 0;
+  border-bottom: 2px solid color-mix(in srgb, var(--fg) 45%, transparent);
+  background: transparent;
+  font-size: 2rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.primary,
+.ghost {
+  min-height: 3.5rem;
+  border-radius: 999px;
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+
+.primary {
+  margin-top: auto;
+  border: 0;
+  background: var(--fill);
+  color: var(--ink);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.actions .primary {
+  margin-top: 0;
+}
+
+.ghost {
+  border: 2px solid color-mix(in srgb, var(--fg) 80%, transparent);
+  background: transparent;
+  color: var(--fg);
+}
+
+.readout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+}
+
+.phase {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.time {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(6.5rem, 34vw, 9rem);
+  font-weight: 650;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.round,
+.left {
+  margin: 0;
+}
+
+.round {
+  font-size: 1.35rem;
+  font-weight: 650;
+}
+
+.left {
+  margin-top: 0.35rem;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+#done .round {
+  margin-top: 0.75rem;
+  font-size: 1.5rem;
+}
